@@ -1,16 +1,20 @@
 """
 ╔══════════════════════════════════════════════════════════════════╗
-║           ChargeGrid Assistant — Goody Chatbot (GoodWe)         ║
+║           ChargeGrid Assistant — Goody Chatbot (GoodWe)          ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Chatbot de teste para auxiliar usuários e administradores de
-eletropostos GoodWe com status de recarga, pagamentos e alertas.
 """
 
 # ──────────────────────────────────────────────
-# PASSO 1: BASE DE DADOS SIMULADA
-# Dicionários que simulam os dados em tempo real
-# do sistema (usuários e administradores).
+import json
+from openai import OpenAI
+from google.colab import userdata   
+
+client = OpenAI(api_key=userdata.get("OPENAI_API_KEY"))
+
+
+# ──────────────────────────────────────────────
+# BASE DE DADOS SIMULADA
 # ──────────────────────────────────────────────
 
 dados_usuario = {
@@ -19,41 +23,37 @@ dados_usuario = {
     "pagamento_atual": "R$ 40,00",
     "historico_pagamentos": {
         "abril": "R$ 55,00",
-        "maio": "R$ 40,00"
+        "maio": "R$ 40,00",
     },
-    "carregadores_disponiveis": 2
+    "carregadores_disponiveis": 2,
 }
 
 dados_admin = {
     "alertas": ["SOBRECARGA NO ELETROPOSTO 05"],
-    "falhas": [
-        "FALHA NO PAGAMENTO — CLIENTE_X | ELETROPOSTO_04"
-    ],
+    "falhas": ["FALHA NO PAGAMENTO — CLIENTE_X | ELETROPOSTO_04"],
     "monitoramento_energetico": "STATUS GERAL: NORMAL",
     "relatorio_eletropostos": {
         "ELETROPOSTO_01": "EM USO",
         "ELETROPOSTO_02": "VAZIO",
         "ELETROPOSTO_03": "FINALIZANDO PAGAMENTO",
         "ELETROPOSTO_04": "FALHA",
-        "ELETROPOSTO_05": "SOBRECARGA"
-    }
+        "ELETROPOSTO_05": "SOBRECARGA",
+    },
 }
 
 
 # ──────────────────────────────────────────────
-# PASSO 2: FUNÇÕES DE RESPOSTA
-# Cada função é responsável por montar e
-# retornar uma resposta específica para o usuário.
+#  FUNÇÕES DE FERRAMENTA (TOOLS)
 # ──────────────────────────────────────────────
 
-def resposta_status_recarga():
+def status_recarga() -> str:
     return (
-        f"🔋 Status atual da sua recarga: {dados_usuario['status_recarga']}\n"
+        f"🔋 Status atual da recarga: {dados_usuario['status_recarga']}\n"
         f"⏱️  Tempo estimado para conclusão: {dados_usuario['tempo_restante']}"
     )
 
 
-def resposta_pagamento():
+def info_pagamento() -> str:
     historico = "\n".join(
         f"   • {mes.capitalize()}: {valor}"
         for mes, valor in dados_usuario["historico_pagamentos"].items()
@@ -64,7 +64,7 @@ def resposta_pagamento():
     )
 
 
-def resposta_carregadores():
+def carregadores_disponiveis() -> str:
     qtd = dados_usuario["carregadores_disponiveis"]
     emoji = "✅" if qtd > 0 else "❌"
     return (
@@ -73,150 +73,188 @@ def resposta_carregadores():
     )
 
 
-def resposta_alertas():
+def listar_alertas() -> str:
     if dados_admin["alertas"]:
         lista = "\n".join(f"   ⚠️  {a}" for a in dados_admin["alertas"])
         return f"🚨 Alertas ativos:\n{lista}"
     return "✅ Nenhum alerta ativo no momento."
 
 
-def resposta_falhas():
+def listar_falhas() -> str:
     if dados_admin["falhas"]:
         lista = "\n".join(f"   ❌ {f}" for f in dados_admin["falhas"])
         return f"🔧 Falhas registradas:\n{lista}"
     return "✅ Nenhuma falha registrada no momento."
 
 
-def resposta_monitoramento():
+def monitoramento_energetico() -> str:
     return f"⚡ Monitoramento energético:\n   {dados_admin['monitoramento_energetico']}"
 
 
-def resposta_relatorio():
+def relatorio_eletropostos() -> str:
+    def icone(status):
+        if status == "EM USO":
+            return "🟢"
+        if status == "VAZIO":
+            return "⚫"
+        if "FINAL" in status:
+            return "🟡"
+        return "🔴"
+
     linhas = "\n".join(
-        f"   {'🟢' if s == 'EM USO' else '⚫' if s == 'VAZIO' else '🟡' if 'FINAL' in s else '🔴'} {ep}: {s}"
+        f"   {icone(s)} {ep}: {s}"
         for ep, s in dados_admin["relatorio_eletropostos"].items()
     )
     return f"📊 Relatório rápido dos eletropostos:\n{linhas}"
 
 
 # ──────────────────────────────────────────────
-# PASSO 3: MAPA DE INTENÇÕES
-# Liga palavras-chave às funções de resposta.
-# O chatbot percorre este dicionário para
-# encontrar qual resposta acionar.
+# MAPA DE FERRAMENTAS
 # ──────────────────────────────────────────────
 
-intencoes = {
-    # Usuário
-    ("status", "recarga", "carregando", "bateria", "carga"):
-        resposta_status_recarga,
-
-    ("pagamento", "pagar", "cobrança", "valor", "histórico", "historico", "fatura"):
-        resposta_pagamento,
-
-    ("carregador", "disponível", "disponivel", "vaga", "livre", "disponibilidade"):
-        resposta_carregadores,
-
-    # Administrador
-    ("alerta", "alertas", "atenção", "atenção", "urgente"):
-        resposta_alertas,
-
-    ("falha", "falhas", "erro", "problema", "quebrado"):
-        resposta_falhas,
-
-    ("energia", "energético", "energetico", "monitoramento", "consumo", "carga geral"):
-        resposta_monitoramento,
-
-    ("relatório", "relatorio", "relatório", "eletroposto", "eletropostos", "status geral"):
-        resposta_relatorio,
+FERRAMENTAS_DISPONIVEIS = {
+    "status_recarga":          status_recarga,
+    "info_pagamento":          info_pagamento,
+    "carregadores_disponiveis": carregadores_disponiveis,
+    "listar_alertas":          listar_alertas,
+    "listar_falhas":           listar_falhas,
+    "monitoramento_energetico": monitoramento_energetico,
+    "relatorio_eletropostos":  relatorio_eletropostos,
 }
 
-SAUDACOES = ("oi", "olá", "ola", "hello", "boa", "bom", "hi", "hey")
-DESPEDIDAS = ("tchau", "até", "ate", "bye", "sair", "exit", "fim", "encerrar")
-AJUDA      = ("ajuda", "help", "menu", "opções", "opcoes", "comandos", "o que")
+
+# ──────────────────────────────────────────────
+# DEFINIÇÃO DAS TOOLS PARA A API
+# ──────────────────────────────────────────────
+
+def _tool(nome: str, descricao: str) -> dict:
+    """Helper que monta uma tool sem parâmetros."""
+    return {
+        "type": "function",
+        "function": {
+            "name": nome,
+            "description": descricao,
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": False,
+            },
+            "strict": True,
+        },
+    }
+
+
+tools = [
+    _tool("status_recarga",
+          "Retorna o status atual da recarga do veículo e o tempo restante."),
+    _tool("info_pagamento",
+          "Retorna o valor da sessão atual e o histórico de pagamentos do usuário."),
+    _tool("carregadores_disponiveis",
+          "Informa quantos carregadores estão disponíveis no momento."),
+    _tool("listar_alertas",
+          "Lista todos os alertas ativos no sistema (uso exclusivo do administrador)."),
+    _tool("listar_falhas",
+          "Lista todas as falhas registradas nos eletropostos (uso exclusivo do administrador)."),
+    _tool("monitoramento_energetico",
+          "Retorna o status geral do monitoramento energético da rede."),
+    _tool("relatorio_eletropostos",
+          "Exibe o relatório completo com o status de cada eletroposto."),
+]
 
 
 # ──────────────────────────────────────────────
-# PASSO 4: FUNÇÕES AUXILIARES
-# Normalização do texto e roteamento central.
+# SYSTEM PROMPT
 # ──────────────────────────────────────────────
 
-def normalizar(texto: str) -> str:
-    """Remove espaços extras e converte para minúsculas."""
-    return texto.strip().lower()
+SYSTEM_PROMPT = """
+Você é o Goody, assistente virtual da ChargeGrid (GoodWe).
+Seu papel é ajudar usuários e administradores de eletropostos.
+
+Para USUÁRIOS você pode:
+  - Consultar o status da recarga em andamento
+  - Informar o pagamento e histórico de cobranças
+  - Verificar carregadores disponíveis
+
+Para ADMINISTRADORES você pode:
+  - Listar alertas ativos
+  - Listar falhas registradas
+  - Exibir o monitoramento energético
+  - Gerar o relatório dos eletropostos
+
+Use SEMPRE as ferramentas disponíveis para buscar os dados reais —
+nunca invente valores. Responda de forma clara, amigável e em português.
+"""
 
 
-def menu_ajuda() -> str:
-    return (
-        "📋 Posso te ajudar com:\n"
-        "  👤 Para USUÁRIOS:\n"
-        "     • status da recarga\n"
-        "     • pagamento / histórico\n"
-        "     • carregadores disponíveis\n\n"
-        "  🔧 Para ADMINISTRADORES:\n"
-        "     • alertas\n"
-        "     • falhas\n"
-        "     • monitoramento energético\n"
-        "     • relatório dos eletropostos\n\n"
-        "  Digite sua pergunta ou escolha um dos tópicos acima."
+# ──────────────────────────────────────────────
+# PROCESSAMENTO DA MENSAGEM
+# ──────────────────────────────────────────────
+
+def processar_mensagem(historico: list) -> str:
+    """
+    Recebe o histórico de mensagens (incluindo a última do usuário)
+    e retorna a resposta final do assistente como string.
+    """
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=historico,
+        tools=tools,
+        temperature=0,
+        max_tokens=1000,
     )
 
+    msg = completion.choices[0].message
 
-def processar_mensagem(mensagem: str) -> str:
-    """
-    Recebe a mensagem do usuário e retorna a resposta adequada.
-    Fluxo:
-      1. Normaliza o texto
-      2. Verifica saudações / despedidas / ajuda
-      3. Percorre o mapa de intenções procurando palavras-chave
-      4. Se nada casar, retorna mensagem de não entendimento
-    """
-    texto = normalizar(mensagem)
+    if not msg.tool_calls:
+        return msg.content
 
-    # Saudação
-    if any(s in texto for s in SAUDACOES):
-        return (
-            "👋 Olá! Eu sou o **Goody**, assistente virtual da GoodWe.\n"
-            "Estou aqui para ajudar com recargas, pagamentos, alertas e muito mais.\n\n"
-            + menu_ajuda()
-        )
+    historico.append(msg)  
 
-    # Despedida
-    if any(d in texto for d in DESPEDIDAS):
-        return "👋 Até logo! Qualquer dúvida é só chamar. Boa recarga! ⚡"
+    for tool_call in msg.tool_calls:
+        nome_funcao = tool_call.function.name
+        funcao = FERRAMENTAS_DISPONIVEIS.get(nome_funcao)
 
-    # Ajuda / menu
-    if any(a in texto for a in AJUDA):
-        return menu_ajuda()
+        if funcao:
+            resultado = funcao()
+        else:
+            resultado = f"Ferramenta '{nome_funcao}' não encontrada."
 
-    # Percorre intenções
-    for palavras_chave, funcao_resposta in intencoes.items():
-        if any(palavra in texto for palavra in palavras_chave):
-            return funcao_resposta()
+        historico.append({
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": resultado,
+        })
 
-    # Fallback
-    return (
-        "🤔 Não entendi muito bem. Pode reformular?\n\n"
-        + menu_ajuda()
+    completion_final = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=historico,
+        tools=tools,
+        temperature=0,
+        max_tokens=1000,
     )
+
+    return completion_final.choices[0].message.content
 
 
 # ──────────────────────────────────────────────
-# PASSO 5: LOOP PRINCIPAL (INTERFACE NO TERMINAL)
-# Exibe o banner, inicia o loop de conversa e
-# chama processar_mensagem() a cada entrada.
+# LOOP PRINCIPAL (INTERFACE NO TERMINAL)
 # ──────────────────────────────────────────────
 
 def iniciar_chatbot():
     banner = """
 ╔══════════════════════════════════════════════════╗
 ║   ⚡  ChargeGrid Assistant — Goody  ⚡           ║
-║       Assistente Virtual GoodWe                  ║
-║  Digite 'ajuda' para ver os comandos disponíveis ║
-║  Digite 'sair' para encerrar                     ║
+║       Assistente Virtual GoodWe (OpenAI API)     ║
+║  Digite 'sair' ou 'tchau' para encerrar          ║
 ╚══════════════════════════════════════════════════╝
     """
     print(banner)
+
+
+    historico = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+    DESPEDIDAS = ("tchau", "até", "ate", "bye", "sair", "exit", "fim", "encerrar")
 
     while True:
         try:
@@ -228,17 +266,21 @@ def iniciar_chatbot():
         if not entrada:
             continue
 
-        resposta = processar_mensagem(entrada)
-        print(f"\nGoody: {resposta}\n")
-
-        # Encerra o loop se o usuário se despedir
-        if any(d in normalizar(entrada) for d in DESPEDIDAS):
+        if any(d in entrada.lower() for d in DESPEDIDAS):
+            print("\nGoody: 👋 Até logo! Qualquer dúvida é só chamar. Boa recarga! ⚡\n")
             break
+
+        historico.append({"role": "user", "content": entrada})
+
+        resposta = processar_mensagem(historico)
+
+        historico.append({"role": "assistant", "content": resposta})
+
+        print(f"\nGoody: {resposta}\n")
 
 
 # ──────────────────────────────────────────────
-# PASSO 6: PONTO DE ENTRADA
-# Só executa se o arquivo for rodado diretamente.
+# START - COMEÇO!
 # ──────────────────────────────────────────────
 
 if __name__ == "__main__":

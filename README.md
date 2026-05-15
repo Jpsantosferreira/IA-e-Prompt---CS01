@@ -28,7 +28,30 @@ Suas Funcionalidades:
 
 💾 Tecnologias Selecionadas 💾
 
+OPENAI API - (openai)     
 
+É o núcleo inteligente do chatbot, mas originalmente frágil e limitado. Para melhorar isso, utilizamos a API (gpt-4o-mini), que entende linguagem natural, facilitando a comunicação natural com o usuário.
+O gpt-4o-mini foi escolhido por ser rápido e mais barato. 
 
+TOOL CALLING     
 
+O Tool calling é a maneira de identifica dados reais e/ou com base legítima; sem ele, a IA iria se basear em "achar" que os dados são aqueles, inventando valores. Com essa ferramenta, o modelo consegue identificar a intenção do usuário, chamando pela função correta, tornando o chatbot lógico.
 
+ROLES DO CHAT     
+
+Temos 4 roles que estruturam o modelo com a API: 
+- system: define que é o chatbot (GOODY), seu escopo e seu comportamento com o usuário.
+
+- user: mensagem digitada pelo usuário.
+
+- assistant: resposta gerada pelo modelo.
+
+- tool: a resolução das funções chamadas, que em sua devolução, auxiliam para que o modelo formule respostas.
+
+MULTI-TURN        
+
+Relacionado com a lista "histórico", que acumula todas as mensagens da sessão e a mesma é enviada inteira a cada vez que ocorre uma solicitação à API. Isso serve como memória para o modelo, criando um contexto em sua interação com usuários.
+
+BASE DE DADOS SIMULADA       
+
+"dados_usuario" e "dados_admin" simulam um banco de dados ou API de telemetria dos eletropostos. Essa é a maneira para testarmos o modelo do chatbot.
