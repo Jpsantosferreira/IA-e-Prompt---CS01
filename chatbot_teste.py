@@ -2,16 +2,19 @@
 ╔══════════════════════════════════════════════════════════════════╗
 ║           ChargeGrid Assistant — Goody Chatbot (GoodWe)          ║
 ╚══════════════════════════════════════════════════════════════════╝
-
 """
 
 # ──────────────────────────────────────────────
-import json
 from openai import OpenAI
-from google.colab import userdata   
 
-client = OpenAI(api_key=userdata.get("OPENAI_API_KEY"))
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # ──────────────────────────────────────────────
 # BASE DE DADOS SIMULADA
@@ -184,6 +187,8 @@ Para ADMINISTRADORES você pode:
 
 Use SEMPRE as ferramentas disponíveis para buscar os dados reais —
 nunca invente valores. Responda de forma clara, amigável e em português.
+
+Você é proibido de responder perguntas que nao estejam relacionadas a goodwe e contexto de eletropostos 
 """
 
 
