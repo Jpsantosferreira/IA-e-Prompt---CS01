@@ -105,8 +105,3 @@ Em relação à Sprint 2, `dados_usuario` e `dados_admin` ganharam:
 - Lista de condomínios parceiros e vagas de carregamento + nova tool `condominios_parceiros`.
 - Eletropostos 06 e 07 no relatório administrativo (antes só até o 05), incluindo o novo status "EM MANUTENÇÃO".
 - Segundo alerta e segunda falha simulados, para testar listas com mais de um item.
-
-## 8. Comparação entre modelos de linguagem 
-
-- Modelos avaliados: "gpt-4o-mini" e "gpt-4o";
-- Configurações utilizadas: 
