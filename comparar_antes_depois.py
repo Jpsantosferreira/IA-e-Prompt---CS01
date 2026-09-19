@@ -43,13 +43,6 @@ from testes_comuns import CASOS_SEGURANCA, TESTES_FUNCIONAIS, TURNOS_MEMORIA
 
 load_dotenv()
 
-# ──────────────────────────────────────────────
-# Instrumentação do cliente legado para capturar uso de tokens
-# (chatbot_teste.processar_mensagem não expõe o `usage` da resposta,
-# então interceptamos client.chat.completions.create para registrá-lo
-# sem alterar a lógica original do arquivo da Sprint 2)
-# ──────────────────────────────────────────────
-
 _registro_uso_legado: list = []
 _create_original = legado.client.chat.completions.create
 

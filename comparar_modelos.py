@@ -56,8 +56,9 @@ if not os.getenv("OPENAI_API_KEY"):
     raise ValueError("Defina OPENAI_API_KEY no seu .env antes de rodar este script.")
 
 
-# Configurações a comparar: 2 modelos + 1 variação de parâmetro
-
+# ──────────────────────────────────────────────
+# Configurações a comparar: >= 2 modelos + 1 variação de parâmetro
+# ──────────────────────────────────────────────
 
 CONFIGURACOES = [
     {"id": "gpt-4o-mini (temperature=0)", "model": "gpt-4o-mini", "temperature": 0.0},
