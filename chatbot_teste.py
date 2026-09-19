@@ -20,6 +20,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 # BASE DE DADOS SIMULADA
 # ──────────────────────────────────────────────
 
+
 dados_usuario = {
     "status_recarga": "75%",
     "tempo_restante": "20 minutos",
