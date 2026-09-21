@@ -3,25 +3,6 @@
 ║  Sprint 03 — Seção 5: Comparação entre modelos de linguagem      ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-O que este script faz:
-    Roda o MESMO conjunto de testes (funcionais + memória + segurança,
-    definidos em testes_comuns.py) usando o mesmo Agent/tools/guardrails
-    de chatbot_agents_sdk.py, mas variando o modelo e alguns parâmetros
-    (temperature), e gera automaticamente o arquivo `relatorio_modelos.md`
-    com uma tabela de resultados reais (tempo de resposta e tokens).
-
-Como rodar:
-    1. Coloque OPENAI_API_KEY (e opcionalmente SENHA_ADMIN) no .env — a
-       chave NUNCA deve ser colada diretamente no código ou em chats.
-    2. pip install openai-agents python-dotenv
-    3. python comparar_modelos.py
-    4. Abra o relatorio_modelos.md gerado. As tabelas já vêm preenchidas
-       com dados reais da execução; complete apenas a seção "Análise
-       qualitativa do grupo" (perguntas guiadas) e a "Decisão final".
-
-Observação: comparar modelos custa dinheiro de API de verdade (cada
-configuração roda ~15 chamadas ao modelo). Se quiser um teste mais barato
-antes de rodar tudo, reduza CONFIGURACOES ou as listas em testes_comuns.py.
 """
 
 import asyncio
@@ -56,27 +37,29 @@ if not os.getenv("OPENAI_API_KEY"):
     raise ValueError("Defina OPENAI_API_KEY no seu .env antes de rodar este script.")
 
 
-# ──────────────────────────────────────────────
-# Configurações a comparar: >= 2 modelos + 1 variação de parâmetro
-# ──────────────────────────────────────────────
+
+# Configurações a comparar:  2 modelos + 1 variação de parâmetro
+
 
 CONFIGURACOES = [
     {"id": "gpt-4o-mini (temperature=0)", "model": "gpt-4o-mini", "temperature": 0.0},
-    {"id": "gpt-4o (temperature=0)", "model": "gpt-4o", "temperature": 0.0},
+    {"id": "gpt-5-nano (padrão)", "model": "gpt-5-nano", "temperature": None},
     {"id": "gpt-4o-mini (temperature=0.8)", "model": "gpt-4o-mini", "temperature": 0.8},
 ]
 
 
-def montar_agente(model: str, temperature: float) -> Agent:
-    return Agent(
-        name=f"Goody ({model}, t={temperature})",
+def montar_agente(model: str, temperature: float | None) -> Agent:
+    kwargs = dict(
+        name=f"Goody ({model}, t={temperature if temperature is not None else 'padrão'})",
         instructions=INSTRUCOES_USUARIO,
         model=model,
-        model_settings=ModelSettings(temperature=temperature),
         tools=TOOLS_USUARIO,
         input_guardrails=[bloquear_prompt_injection, bloquear_dados_sensiveis],
         output_guardrails=[bloquear_vazamento_de_instrucoes],
     )
+    if temperature is not None:
+        kwargs["model_settings"] = ModelSettings(temperature=temperature)
+    return Agent(**kwargs)
 
 
 async def rodar_mensagem(agente: Agent, mensagem: str, sessao: SQLiteSession) -> dict:
@@ -173,7 +156,8 @@ def gerar_relatorio_markdown(resultados: dict) -> None:
     linhas.append("| Configuração | Modelo | Temperature |")
     linhas.append("|---|---|---|")
     for c in CONFIGURACOES:
-        linhas.append(f"| {c['id']} | {c['model']} | {c['temperature']} |")
+        temp_exibida = c["temperature"] if c["temperature"] is not None else "padrão (sem override)"
+        linhas.append(f"| {c['id']} | {c['model']} | {temp_exibida} |")
     linhas.append("")
 
     linhas.append("## 2. Conjunto de testes utilizado\n")

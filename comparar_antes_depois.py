@@ -2,25 +2,6 @@
 ╔══════════════════════════════════════════════════════════════════╗
 ║  Sprint 03 — Seção 6: Comparativo antes × depois                 ║
 ╚══════════════════════════════════════════════════════════════════╝
-
-O que este script faz:
-    Roda o MESMO conjunto de testes (testes_comuns.py) contra:
-      - a arquitetura LEGADA das Sprints 1-2 (chatbot_teste.py, tool
-        calling manual + histórico em lista Python);
-      - a arquitetura NOVA da Sprint 03 (chatbot_agents_sdk.py, Agent +
-        Runner + SQLiteSession, agente `goody_usuario`);
-    mede latência e tokens usados em cada turno, e gera automaticamente
-    o arquivo `comparativo_antes_depois.md` com uma tabela de métricas
-    reais — para alimentar a seção 7.3 do relatório de evolução em PDF.
-
-Como rodar:
-    1. Configure OPENAI_API_KEY no .env.
-    2. Garanta que chatbot_teste.py e chatbot_agents_sdk.py estão na
-       mesma pasta deste script.
-    3. python comparar_antes_depois.py
-    4. Copie a tabela gerada em comparativo_antes_depois.md para dentro
-       do relatorio_evolucao.pdf (seção 7.3), ou peça para eu regenerar
-       o PDF a partir desses números.
 """
 
 import asyncio
@@ -68,7 +49,7 @@ def rodar_legado(mensagem: str, historico: list) -> dict:
     usos = [u for u in _registro_uso_legado[antes:depois] if u is not None]
     tokens_total = sum(u.total_tokens for u in usos) if usos else None
     return {
-        "bloqueado": False,  # a arquitetura legada não tem guardrails
+        "bloqueado": False,
         "resposta": resposta,
         "latencia_s": round(latencia, 2),
         "tokens_total": tokens_total,
@@ -114,7 +95,7 @@ async def rodar_tudo() -> dict:
         r_novo = await rodar_novo(caso["mensagem"], sessao)
         resultados["novo"]["funcionais"].append({"nome": caso["nome"], **r_novo})
 
-    # --- Memória (mesma "conversa" nos 3 turnos, para cada arquitetura) ---
+
     hist_memoria = [{"role": "system", "content": legado.SYSTEM_PROMPT}]
     sessao_memoria = SQLiteSession("antesdepois_novo_memoria")
     for i, mensagem in enumerate(TURNOS_MEMORIA, start=1):
@@ -124,7 +105,7 @@ async def rodar_tudo() -> dict:
         r_novo = await rodar_novo(mensagem, sessao_memoria)
         resultados["novo"]["memoria"].append({"turno": i, "mensagem": mensagem, **r_novo})
 
-    # --- Segurança (contexto novo a cada caso) ---
+
     for caso in CASOS_SEGURANCA:
         hist = [{"role": "system", "content": legado.SYSTEM_PROMPT}]
         r_legado = rodar_legado(caso["mensagem"], hist)

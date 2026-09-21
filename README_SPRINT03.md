@@ -49,7 +49,11 @@ python comparar_modelos.py
 ```
 
 Roda o mesmo conjunto de testes em 3 configurações (`gpt-4o-mini` e
-`gpt-4o`, com uma variação de `temperature`), mede tokens e latência, e
+Roda o mesmo conjunto de testes em 3 configurações. Por padrão:
+`gpt-4o-mini` e `gpt-5-nano` (dois modelos diferentes — ajuste os nomes em
+`CONFIGURACOES`, no topo do script, conforme os modelos disponíveis no seu
+projeto OpenAI: rode `client.models.list()` pra ver quais você tem acesso),
+mais uma variação de `temperature`. Mede tokens e latência, e
 gera **`relatorio_modelos.md`** já com as tabelas preenchidas. Vocês só
 precisam completar as seções "Diferenças percebidas", "Vantagens e
 limitações" e "Modelo escolhido / justificativa" com a análise do grupo.

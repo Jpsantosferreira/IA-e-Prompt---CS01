@@ -73,16 +73,13 @@ def tabela(dados, col_widths=None):
 
 
 
-# Cabeçalho
-
 story.append(Paragraph("Relatório de Evolução — Sprint 03", styles["Title"]))
 story.append(Paragraph("EV Challenge — GoodWe · Chatbot Goody", styles["Heading3"]))
 story.append(Spacer(1, 10))
 
 
-# 7.1 Resumo da evolução
 
-h1("7.1 Resumo da evolução (Sprints 1-2 → Sprint 03)")
+h1(".1 Resumo da evolução (Sprints 1-2 → Sprint 03)")
 p(
     "Nas Sprints 1 e 2, o chatbot Goody foi implementado em "
     "<b>chatbot_teste.py</b> com chamadas diretas ao SDK <b>openai</b> "
@@ -112,9 +109,8 @@ p(
 )
 
 
-# 7.2 Refatoração
 
-h1("7.2 Refatoração — principais decisões técnicas")
+h1(".2 Refatoração — principais decisões técnicas")
 bullets(
     [
         "<b>Agent + Runner</b> no lugar do loop manual: cada função de ferramenta virou uma "
@@ -139,9 +135,8 @@ p(
     "um classificador de moderação dedicado em produção."
 )
 
-# 7.3 Comparativo antes × depois
 
-h1("7.3 Comparativo antes × depois")
+h1(".3 Comparativo antes × depois")
 
 
 def carregar_comparativo_md(caminho="comparativo_antes_depois.md"):
@@ -200,9 +195,8 @@ p(
 )
 
 
-# 7.4 Problemas encontrados e soluções
 
-h1("7.4 Problemas encontrados e soluções")
+h1(".4 Problemas encontrados e soluções")
 
 h2("Problema 1 — SDK assíncrono em um chatbot originalmente síncrono")
 p(
@@ -262,9 +256,8 @@ p(
 )
 
 
-# 7.5 Divisão da equipe
 
-h1("7.5 Divisão da equipe")
+h1(".5 Divisão da equipe")
 
 
 def carregar_equipe_txt(caminho="equipe.txt"):
