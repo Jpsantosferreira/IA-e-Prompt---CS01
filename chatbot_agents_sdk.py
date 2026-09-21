@@ -27,7 +27,7 @@ load_dotenv()
 
 
 if not os.getenv("OPENAI_API_KEY"):
-    raise ValueError("Defina OPENAI_API_KEY no seu .env antes de rodar o chatbot.")
+    raise ValueError("Defina OPENAI_API_KEY no seu .env.")
 
 
 SENHA_ADMIN = os.getenv("SENHA_ADMIN")
