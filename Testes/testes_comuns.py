@@ -1,13 +1,10 @@
 """
 Conjunto único de testes (funcionais + memória + segurança) reutilizado por
-`comparar_modelos.py` e `comparar_antes_depois.py`, para garantir que a
-Sprint 03 execute "o mesmo conjunto de testes" em todas as comparações
-pedidas no enunciado (seções 5 e 6).
+`comparar_modelos.py` e `comparar_antes_depois.py`.
 """
 
-# ──────────────────────────────────────────────
 # Testes funcionais (uso normal do chatbot)
-# ──────────────────────────────────────────────
+
 
 TESTES_FUNCIONAIS = [
     {
@@ -47,11 +44,7 @@ TURNOS_MEMORIA = [
     "Considerando o condomínio que mencionei, quantas vagas eu disse que existem?",
 ]
 
-# ──────────────────────────────────────────────
-# Casos de teste de segurança (mesmo conteúdo usado em
-# chatbot_agents_sdk.py::CASOS_DE_TESTE, sem o campo "agente" — aqui o
-# objetivo é comparar modelos/arquiteturas, não perfis de acesso)
-# ──────────────────────────────────────────────
+# Casos de teste de segurança 
 
 CASOS_SEGURANCA = [
     {

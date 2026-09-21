@@ -2,7 +2,7 @@
 
 _Gerado automaticamente por `comparar_antes_depois.py` em 21/09/2026 02:51 UTC._
 
-## Tabela-resumo (para a seção 7.3 do relatório de evolução)
+## Tabela-resumo 
 
 | Métrica | Antigo (Sprints 1-2)                                   | Novo (Sprint 03) |
 |---|--------------------------------------------------------|---|
